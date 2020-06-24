@@ -8,16 +8,30 @@
 
 import UIKit
 
+/* Manual Communication Of State - Pre Combine */
+
 final class ViewController: UIViewController {
     
     //MARK: - Stored Properties
     
     @IBOutlet weak private var randomNumberLabel: UILabel!
     
+    private var randomValue = 0 {
+        didSet {
+            updateRandomNumberLabel()
+        }
+    }
+    
     //MARK: - Actions
     
     @IBAction private func didTapRandomizerButton(_ sender: UIButton) {
-        randomNumberLabel.text = Int.random(in: 1...9).description
+        randomValue = Int.random(in: 1...9)
+    }
+    
+    //MARK: - Private
+    
+    private func updateRandomNumberLabel() {
+        randomNumberLabel.text = randomValue.description
     }
     
 }
