@@ -8,16 +8,23 @@
 
 import Combine
 
-final class PlayerPresenter {
+// Because ContentView is observing an instance of this, it needs to conform to ObservableObject protocol
+final class PlayerPresenter: ObservableObject {
     
     let player = Player()
+    var cancellable: AnyCancellable?
     
-    // Subscribes to player's Publisher, modify it and re-publish
-    func playerValueAsString() -> AnyPublisher<String?, Never> {
-        player
-            .$randomValue // 4: Cancellable is listening for the change in the model, so we handle the model being modified
-            .map{int in int.description}
-            .eraseToAnyPublisher() // To avoid Publishers.Map<Published.Int>Publisher, String> because of re-publish
+    // 3: ContentView is relying on this property to produce a UI update, so we need to Publish it
+    @Published var playerValueAsString: String = ""
+    
+    init() {
+        cancellable
+            = player
+                .$randomValue // 5: Cancellable is listening for a change in the model, so we handle the model being modified
+                .map{int in int.description}
+                .sink{ [weak self] string in // assing() strongly retains self so we use sink
+                    self?.playerValueAsString = string // 6: Published value gets updated
+        }
     }
     
     func randomize() {
